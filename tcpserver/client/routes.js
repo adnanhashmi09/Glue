@@ -1,4 +1,4 @@
-const TCPClient = require("./TCPCleint");
+const TCPClient = require("./TCPClient");
 const fs = require("fs");
 
 const client = new TCPClient("127.0.0.1", 31337);
@@ -22,6 +22,12 @@ client.get("CLIP_TEXT", (dat) => {
 client.get("CLIP_FILE", (dat) => {
   console.log(dat);
   fs.writeFileSync("file2", dat.file);
+  client.send({type: 'CLIP_FILE_ENDED', text: 'File Transfer Completed'})
 });
 
+client.get('CLIP_FILE_ENDED', (dat) => {
+  console.log(dat);
+})
+
 module.exports = { client };
+
