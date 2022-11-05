@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { getHistory, getNetwork, updateNetwork, initNetwork, filterHistory, getNodes, newData } = require('../controllers/elastic')
+const { getHistory, getNetwork, updateNetwork, initNetwork, filterHistory, getNodes, newData, syncData } = require('../controllers/elastic')
 
 router.post('/new', newData) 
 router.get('/history/:network', getHistory); 
