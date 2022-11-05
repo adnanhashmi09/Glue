@@ -1,10 +1,10 @@
-const net = require("net");
-const os = require("os");
-const fs = require("fs");
-const msgpackr = require("msgpackr");
+const net = require('net');
+const os = require('os');
+const fs = require('fs');
+const msgpackr = require('msgpackr');
 
-const { createReadStream, createWriteStream, readFileSync } = require("fs");
-const { PassThrough } = require("stream");
+const { createReadStream, createWriteStream, readFileSync } = require('fs');
+const { PassThrough } = require('stream');
 
 class TCPClient {
   constructor(host, port, token) {
@@ -20,6 +20,7 @@ class TCPClient {
 
   reinitialize() {
     this.s = new net.Socket();
+    this.ns = new net.Socket();
     this.s.setNoDelay(true);
     this.state = { auth: false, id: null };
   }
@@ -32,16 +33,16 @@ class TCPClient {
     });
 
     this.s.connect({ host: this.host, port: this.port });
-    this.s.on("connect", () => {
+    this.s.on('connect', () => {
       console.log(`[-] Connected to server`);
       connectResolve();
     });
-    this.s.on("data", this.ondata.bind(this));
-    this.s.on("close", () => {
+    this.s.on('data', this.ondata.bind(this));
+    this.s.on('close', () => {
       console.log(`[-] Disconnected from server`);
       if (this.disconnectResolve) this.disconnectResolve();
     });
-    this.s.on("error", () => connectReject());
+    this.s.on('error', () => connectReject());
 
     return connectPromise;
   }
@@ -85,6 +86,10 @@ class TCPClient {
     this.ondata(buf.subarray(length + 4));
   }
 
+  discover() {
+    this.send({ type: 'DISCOVER' });
+  }
+
   send(obj) {
     const data = msgpackr.pack(obj);
     const length = data.length;
@@ -101,22 +106,33 @@ class TCPClient {
   ping() {
     const hrTime = process.hrtime();
     const ns = hrTime[0] * 1000 + hrTime[1] / 1000000;
-    this.send({ type: "PING", ns });
+    this.send({ type: 'PING', ns });
   }
   authenticate(token) {
-    this.send({ type: "AUTH", token, name: os.hostname(), device: "PC" });
+    let networkInterfaces = os.networkInterfaces();
+    delete networkInterfaces.lo;
+    this.send({
+      type: 'AUTH',
+      token,
+      hostname: os.hostname(),
+      platform: os.platform(),
+      localAddress: this.s.localAddress,
+      remoteAddress: this.s.remoteAddress,
+      // networkInterfaces: networkInterfaces,
+    });
   }
   sendText(text) {
-    this.send({ type: "CLIP_TEXT", text });
+    this.send({ type: 'CLIP_TEXT', text });
   }
 
   sendFile(path) {
-    console.log("sending file");
+    console.log('sending file');
     this.send({
-      type: "CLIP_FILE",
+      type: 'CLIP_FILE',
       file: fs.readFileSync(path),
+      fileName: path.split('/').pop(),
     });
-    console.log("done");
+    console.log('done');
   }
 }
 
