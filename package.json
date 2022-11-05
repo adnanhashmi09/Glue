@@ -1,0 +1,14 @@
+{
+  "name": "glue-server",
+  "version": "1.0.0",
+  "main": "server/app.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "dependencies": {
+    "bson": "^4.7.0",
+    "mongoose": "^6.7.1",
+    "msgpackr": "^1.7.2"
+  }
+}
