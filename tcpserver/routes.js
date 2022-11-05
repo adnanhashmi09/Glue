@@ -36,4 +36,12 @@ server.get("CLIP_FILE", (s, data) => {
   );
 });
 
+server.get('CLIP_FILE_ENDED', (s, data) => {
+  server.broadcast(
+    { type: 'CLIP_FILE_ENDED', ...data },
+    server.clients[s.id].room,
+    s.id
+  )
+})
+
 module.exports = { server };

@@ -13,7 +13,7 @@ const main = async () => {
 
       process.stdin.on("data", (data) => {
         if (data.toString().trim() === "video") {
-          client.sendFile(path.join(__dirname, "..", "video.mp4"));
+          client.sendFile(path.join(__dirname, "..", "file.txt")); // change here
           // client.sendFile("./hello.txt");
         } else {
           client.sendText(data.toString().trim());
