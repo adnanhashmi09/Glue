@@ -1,23 +1,26 @@
 const crypto = require('crypto');
 
-module.exports.newData = (req, res) => {
-    const { network, data, id } = req.body;
+module.exports.newData = async (req, res) => {
+    const { data } = req.body;
     const client = req.elasticClient;
-    client.update({
-        index: "data",
-        body: {
-            network: network,
-            message: data,
-            id: id, 
-        }
-    })
-    .then(response => {
-        console.log(response);
-        res.status(200).json(response);
-    })
-    .catch(err => {
+
+    try {
+        await Promise.any(data.map(el =>  
+            client.create({
+            index: "data",
+            id: el.id,
+            body: {
+                "network": el.network,
+                "message": el.data,
+                "id": el.id,
+                "device": el.device
+            }
+        })))
+    } catch(err) {
         console.log(err);
-    })
+    }
+
+    res.status(200).json({err: null});
 }
 
 module.exports.getHistory = (req, res) => {
