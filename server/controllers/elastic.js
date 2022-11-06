@@ -99,6 +99,38 @@ module.exports.getNetwork = (req, res) => {
     })
 }
 
+module.exports.getNetworkNodes = async (req, res) => {
+    const { node } = req.body;
+    const client = req.elasticClient;
+    try {
+        const rs = await client.search({
+            index: "nodes",
+            query: {
+                match: {
+                    node: node
+                }
+            }
+        })
+        const dat = rs.hits.hits;
+        if(dat.length <= 0) {
+            res.status(400).json({err: "no network"});
+        }
+        const network = dat[0]._source.network;
+        const resp = await client.search({
+            index: "nodes",
+            query: {
+                match: {
+                    network: network
+                }
+            }
+        })
+        res.status(200).json(resp.hits.hits)
+        
+    } catch(err) {
+        console.log(err);
+    }
+}
+
 module.exports.getNodes = (req, res) => {
     const { network } = req.body;    
     const client = req.elasticClient;
