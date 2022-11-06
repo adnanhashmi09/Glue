@@ -97,10 +97,10 @@ module.exports.getNetwork = (req, res) => {
 }
 
 module.exports.getNetworkNodes = async (req, res) => {
-    const { node } = req.params;
+    const { node } = req.body;
     const client = req.elasticClient;
     try {
-        const res = await client.search({
+        const rs = await client.search({
             index: "nodes",
             query: {
                 match: {
@@ -108,10 +108,11 @@ module.exports.getNetworkNodes = async (req, res) => {
                 }
             }
         })
-        const dat = res.hits.hits;
-        if(dat.length() <= 0) {
+        const dat = rs.hits.hits;
+        if(dat.length <= 0) {
             res.status(400).json({err: "no network"});
         }
+        const network = dat[0]._source.network;
         const resp = await client.search({
             index: "nodes",
             query: {
@@ -120,7 +121,7 @@ module.exports.getNetworkNodes = async (req, res) => {
                 }
             }
         })
-        res.status(200).json(resp.hit.hits)
+        res.status(200).json(resp.hits.hits)
         
     } catch(err) {
         console.log(err);

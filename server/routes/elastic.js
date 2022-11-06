@@ -8,6 +8,6 @@ router.get('/network/:node', getNetwork);
 router.post('/network/network_nodes', getNetworkNodes) 
 router.post('/network/nodes', getNodes); 
 router.post('/network/update', updateNetwork); 
-router.get('/network/init/:node', initNetwork); 
+router.post('/network/init/', initNetwork); 
 
 module.exports = router;
