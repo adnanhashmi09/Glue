@@ -23,6 +23,41 @@ module.exports.newData = async (req, res) => {
     res.status(200).json({err: null});
 }
 
+module.exports.deleteNodes = async (req, res) => {
+    const { data, node } = req.body;
+    const client = req.elasticClient;
+    try {
+        await Promise.any(data.map(el =>  
+            client.create({
+            index: "data",
+            id: el.id,
+            body: {
+                "network": el.network,
+                "message": el.data,
+                "id": el.id,
+                "device": el.device
+            }
+        })))
+    } catch(err) {
+        console.log(err);
+    }
+    client.delete({
+        index: "nodes",
+        query: {
+            match: {
+                node: node
+            }
+        }
+    })
+    .then(response => {
+        console.log(response);
+        res.status(200).json({err: null});
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}
+
 module.exports.getHistory = (req, res) => {
     const { network } = req.params;
     const client = req.elasticClient;
